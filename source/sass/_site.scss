@@ -65,7 +65,7 @@
     color: rgba($black, .4);
     margin-right: 30px;
     @include breakpoint($tablet) {
-      text-align: left;
+      text-align: right;
     }
   }
 
