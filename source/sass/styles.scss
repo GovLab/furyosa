@@ -1,2 +1,14 @@
-@import '../../node_modules/govlab-styleguide/sass/styles.scss'; // govlab-styleguide sass
+// Importing Styleguide
+@import '../../node_modules/govlab-styleguide/sass/styles'; // govlab-styleguide sass
+
+
+// New Components
+@import 'main-search';
+@import 'news-box';
+@import 'main-categories';
+@import 'cards-extend';
+
+
+
+// Site specific styles
 @import 'site';

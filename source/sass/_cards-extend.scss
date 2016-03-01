@@ -1,0 +1,47 @@
+// // Colors for the main categories
+
+.b-card2 {
+  width: 25%;
+  height: 0;
+
+  display: inline-block;
+  padding: 30px;
+  position: relative;
+  padding-bottom: 25%;
+
+  p {
+    
+    &.e-card-name {
+        font-size: 18px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    &.e-card-description {
+        position: absolute;
+        bottom: 0;
+    }
+  }
+
+  &.m-behavioral-research {
+    background-color: blue;
+  }
+  &.m-citizen-engagement{
+    background-color: cyan;
+  }
+  &.m-civic-technology {
+    background-color: red;
+  }
+  &.m-data-analysis {
+    background-color: orange;
+  }
+  &.m-expert-networking {
+    background-color: $blue;
+  }
+  &.m-open-data {
+    background-color: pink;
+  }
+  &.m-labs-and-experimentation {
+    background-color: green;
+  }
+}
