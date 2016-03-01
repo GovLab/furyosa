@@ -6956,14 +6956,11 @@ code.m-negative {
   margin: 0 auto; }
 
 .b-card2 {
-  width: 33%;
+  width: 55%;
   height: 0;
   display: inline-block;
-  padding: 30px 30px calc(33% - 60px) 30px;
-  margin: 0 -2px;
+  margin: 20px;
   position: relative; }
-  .b-card2 a:hover {
-    text-decoration: none; }
   .b-card2 p {
     color: rgba(255, 255, 255, 0.8); }
     .b-card2 p.e-card-name {
