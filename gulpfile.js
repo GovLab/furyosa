@@ -19,11 +19,12 @@ gulp.task('browserSync', function() {
 })
 
 gulp.task('sass', function() {
-  return gulp.src('source/sass/styles.scss')  // sass entry point
-  .pipe(plumber())
-  .pipe(sass())
-  .pipe(gulp.dest('public/css'))
-  .pipe(browserSync.stream());
+  return gulp.src('source/sass/**/*.scss') // Gets all files ending with .scss in source/sass
+    .pipe(sass().on('error', sass.logError))
+    .pipe(gulp.dest('public/css'))
+    .pipe(browserSync.reload({
+      stream: true
+    }))
 });
 
 gulp.task('img', function() {

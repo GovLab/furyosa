@@ -1,16 +1,18 @@
-// // Colors for the main categories
-
 .b-card2 {
-  width: 25%;
+  width: 33%;
   height: 0;
-
   display: inline-block;
-  padding: 30px;
+  
+  padding: 30px 30px calc(33% - 60px) 30px;
+  margin: 0 -2px;
   position: relative;
-  padding-bottom: 25%;
+
+  a:hover { text-decoration: none; }
+  
 
   p {
-    
+    color: rgba($white, .8);
+
     &.e-card-name {
         font-size: 18px;
         font-weight: 600;
@@ -20,23 +22,25 @@
     &.e-card-description {
         position: absolute;
         bottom: 0;
+        left: 0;
+        padding: 0 30px 20px;
     }
   }
 
   &.m-behavioral-research {
-    background-color: blue;
+    background-color: $blue;
   }
-  &.m-citizen-engagement{
-    background-color: cyan;
+  &.m-citizen-engagement {
+    background-color: $teal;
   }
   &.m-civic-technology {
-    background-color: red;
+    background-color: $red;
   }
   &.m-data-analysis {
-    background-color: orange;
+    background-color: $orange;
   }
   &.m-expert-networking {
-    background-color: $blue;
+    background-color: $red;
   }
   &.m-open-data {
     background-color: pink;
