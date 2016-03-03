@@ -2,7 +2,7 @@
 # ===============
 
 id: INT 
-# Base Item ID
+# Base Item ID. Auto-generated
 
 pub_date: DATETIME
 # Date the item was added to the system defaults to Datetime.now() Auto-generated
@@ -16,6 +16,9 @@ title: STRING (144 chars)
 url: STRING (url) 
 # Item main URL
 
+access: BOOL
+# Flags if the access to the paper is free.
+
 
 # Optional Fields
 # ===============
@@ -28,19 +31,19 @@ authors: LIST of STRINGS
 paper_date: DATETIME.date()
 # date the paper was first published
 
-organization: STRING (keywords)
+organization: STRING (keywords | slugyfied)
 # determines if the paper was created by one of the partner organizations
 
-region: STRING (keywords)
+region: STRING (keywords | slugyfied)
 # keywords. Ideally use WB regions naming (MENA, LAC, etc) and/or 2 Char country code (US, CA, BR, etc.)
 
-sector: STRING (keywords)
+sector: STRING (keywords | slugyfied)
 # list of keywords to categorize the paper according to sector
 
-type: STRING
+type: STRING (keywords | slugyfied)
 # Type of publication. Reseach Paper, Article, etc.
 
-abstract: LONG STRING (800 chars) 
+abstract: LONG STRING (1200 chars) 
 # usually the abstract from teh paper itself. Maybe support markdown
 
 taxonomy: # list of keywords to categorize the paper in the research taxonomy
@@ -73,7 +76,7 @@ datasets: LIST of OBJECTS # link to datasets mentioned on the paper
     url: STRING (url) # url for the dataset
 
 
-entry_points: LIST of Strings (keywords)
+entry_points: LIST of Strings (keywords | slugyfied)
 # Determines which of the special homepages (subsets) the item will be displayed. It works as a special product/site related sub-section of the data base
 
 related_content: LIST # a list of related links for the item
