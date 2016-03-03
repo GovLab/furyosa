@@ -1,19 +1,19 @@
 # Required Fields
 # ===============
 
-id: INT 
+id: INT
 # Base Item ID
 
 pub_date: DATETIME
 # Date the item was added to the system defaults to Datetime.now() Auto-generated
 
-last_updated: DATETIME 
+last_updated: DATETIME
 # Datetime of the last update on the item. Auto-generated.
 
-title: STRING (144 chars) 
+title: STRING (144 chars)
 # Item title
 
-url: STRING (url) 
+url: STRING (url)
 # Item main URL
 
 
@@ -22,7 +22,7 @@ url: STRING (url)
 # All the optional fileds will default to FALSE
 
 # Item Meta Info
-authors: LIST of STRINGS 
+authors: LIST of STRINGS
 # auto-complete on upload interface to avoid duplicates
 
 paper_date: DATETIME.date()
@@ -40,11 +40,11 @@ sector: STRING (keywords)
 type: STRING
 # Type of publication. Reseach Paper, Article, etc.
 
-abstract: LONG STRING (800 chars) 
-# usually the abstract from teh paper itself. Maybe support markdown
+abstract: LONG STRING (800 chars)
+# usually the abstract from the paper itself. Maybe support markdown
 
 taxonomy: # list of keywords to categorize the paper in the research taxonomy
-  category: LIST of STRINGS (keywords/taxonomy) 
+  category: LIST of STRINGS (keywords/taxonomy)
   methodology: LIST of STRINGS (keywords/taxonomy)
   objective: LIST of STRINGS (keywords/taxonomy)
 
@@ -54,16 +54,16 @@ direct_download: # indicates if the paper itself is directly linked to the repos
   pdf: STRING (url)
   word: STRING (url)
   mobi: STRING (url)
-  epub: STRING (url)  
-  other: 
+  epub: STRING (url)
+  other:
     name: STRING
     url: STRING (url)
 
 cover_image: STRING (url)
 # absolute link or relative path to an image file. This will enable of disable the header image for the specific paper
 
-html_content: STRING (url) 
-# links to an internal html file, which will be inserted in the templating engine via {% extend block %}. This will enable the merge between ODImpact and the Research Repo. Some Taxonomy changes might be required. 
+html_content: STRING (url)
+# links to an internal html file, which will be inserted in the templating engine via {% extend block %}. This will enable the merge between ODImpact and the Research Repo. Some Taxonomy changes might be required.
 
 github: STRING (url)
 # github url related to the paper
