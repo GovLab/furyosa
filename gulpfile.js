@@ -7,7 +7,6 @@ nunjucksRender  = require('gulp-nunjucks-render'),
 browserSync     = require('browser-sync'),
 file            = require('gulp-file'),
 plumber         = require('gulp-plumber'),
-excel2json      = require('gulp-excel2json'),
 csv2json        = require('gulp-csv2json'),
 rename          = require('gulp-rename'),
 gulpFn          = require('gulp-fn'),
@@ -26,19 +25,21 @@ var COL_NAME_MAP = {
   'Open vs. Closed Access': 'access',
   'Organization'          : 'organization',
   'Authors'               : 'authors',
-  'Screenshot'            : 'cover_image',
+  'Image or Screenshot'   : 'cover_image',
   'Published On'          : 'paper_date',
+  'Submitted On'          : 'submission_date',
   'Link to download'      : 'url',
   'Sector'                : 'sector',
   'Region'                : 'region',
+  'Publication Type'      : 'type',
+  'GitHub Repository'     : 'github',
+  'Abstract'              : 'abstract',
+  'Content URL'           : 'html_content',
   'Innovation'            : { parent : 'taxonomy', value : 'category' },
   'Methodology'           : { parent : 'taxonomy', value : 'methodology' },
   'Objective'             : { parent : 'taxonomy', value : 'objective' },
-  'Publication Type'      : 'type',
-  'GitHub Repository'     : 'github',
   'Dataset Name'          : { parent : 'datasets', value : 'name', delimiter : ';', many : true },
   'Dataset URL'           : { parent : 'datasets', value : 'url', delimiter : ';', many : true },
-  'Abstract'              : 'abstract',
   'Related Content Title' : { parent : 'related_content', value : 'title', delimiter : ';', many : true },
   'Related Content URL'   : { parent : 'related_content', value : 'url', delimiter : ';', many : true },
   'PDF URL'               : { parent : 'direct_download', value : 'pdf' },
@@ -105,19 +106,6 @@ gulp.task('deploy', ['sass', 'nunjucks', 'js', 'img'], shell.task([
   ])
 );
 
-gulp.task('x2json', function() {
-  return gulp.src('etc/**.xlsx')
-  .pipe(excel2json({
-    headRow: 1,
-    valueRowStart: 2,
-    trace: true
-  }))
-  .pipe(rename(function (path) {
-    path.extname = ".json"
-  }))
-  .pipe(gulp.dest('data'))
-});
-
 function processJSON ( file ) {
   'use strict';
   var _json = JSON.parse(file.contents.toString());
@@ -125,8 +113,6 @@ function processJSON ( file ) {
   for (var i in _json) {
     _jsonOut[i] = {};
     _jsonOut[i].id = i;
-    _jsonOut[i].pub_date = new Date().toLocaleString();
-    _jsonOut[i].last_updated = new Date().toLocaleString();
 
     if (processJSONOptions.diff) {
       console.log('{   '.inverse);
@@ -200,7 +186,7 @@ function processJSON ( file ) {
   file.contents = new Buffer(out);
 }
 
-gulp.task('csv2json', function() {
+gulp.task('json', function() {
   var options = {};
   return gulp.src('etc/**.csv')
   .pipe(csv2json(options))
