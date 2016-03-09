@@ -1,0 +1,21 @@
+{% extends '_base.html' %}
+{% block main %}
+<style type="text/css">
+    .b-card {
+        background-color: #efe;
+        width: 100px;
+        height: 100px;
+        display: inline-block;
+        margin: 5px;
+    }
+</style>
+<a class="b-button b-filter-ui js-click js-default" data-filter="*">all</a>
+<a class="b-button b-filter-ui js-click" data-filter="yo">yo</a>
+<a class="b-button b-filter-ui js-click" data-filter="hey">hey</a>
+<div class="b-isotope">
+    <div class="b-card b-result yo">yo man</div>
+    <div class="b-card b-result yo">yo dog</div>
+    <div class="b-card b-result hey">hey man</div>
+    <div class="b-card b-result hey">hey dog</div>
+</div>
+{% endblock %}
