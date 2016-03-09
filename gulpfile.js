@@ -19,8 +19,9 @@ packagejson     = require('./package.json');
 
 var argv = minimist(process.argv.slice(2));
 
-var processJSONOptions = {
-  diff   : false || argv.diff
+var cliOptions = {
+  diff      : false || argv.diff,
+  verbose   : false || argv.verbose
 };
 
 var COL_NAME_MAP = {
@@ -225,13 +226,14 @@ gulp.task('nunjucks', ['generateResearchFiles'], function() {
   .pipe(plumber())
   .pipe(data(function(file) {
     for (var i in researchjson) {
-      if (file.path.indexOf(researchjson[i].id + '--') >= 0) {
-        console.log(i);
-        console.log('Found Generated Template',  file.path, ': using ', JSON.stringify(researchjson[i]).green);
+      if (file.path.indexOf(researchjson[i].id) >= 0) {
+        if (cliOptions.verbose) {
+          console.log('Found Generated Template',  file.path, ': using ', JSON.stringify(researchjson[i]).green);
+        }
         return researchjson[i];
       }
-      return require('./data/data.json');
     }
+    return require('./data/data.json');
   }))
   .pipe(nunjucksRender(options))
   .pipe(gulp.dest('public'))
