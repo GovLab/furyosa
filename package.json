@@ -9,8 +9,10 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "blueimp-md5": "^2.3.0",
     "browser-sync": "^2.11.1",
     "colors": "^1.1.2",
+    "event-stream": "^3.3.2",
     "govlab-styleguide": "^1.0.9",
     "gulp": "^3.9.1",
     "gulp-csv2json": "^0.2.5",
