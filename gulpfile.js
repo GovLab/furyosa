@@ -1,17 +1,20 @@
 var
+fs              = require('fs'),
 gulp            = require('gulp'),
 sass            = require('gulp-sass'),
 shell           = require('gulp-shell'),
 data            = require('gulp-data'),
 nunjucksRender  = require('gulp-nunjucks-render'),
 browserSync     = require('browser-sync'),
-file            = require('gulp-file'),
 plumber         = require('gulp-plumber'),
 csv2json        = require('gulp-csv2json'),
 rename          = require('gulp-rename'),
 gulpFn          = require('gulp-fn'),
 colors          = require('colors'),
 minimist        = require('minimist'),
+researchjson    = require('./data/research.json'),
+File            = require('vinyl'),
+md5             = require('blueimp-md5');
 packagejson     = require('./package.json');
 
 var argv = minimist(process.argv.slice(2));
@@ -50,64 +53,6 @@ var COL_NAME_MAP = {
   'ePub URL'              : { parent : 'direct_download', value : 'epub' },
   'Other URL'             : { parent : 'direct_download', value : 'other', children : ['url', 'name'], delimiter : ' ' }
 };
-
-gulp.task('browserSync', function() {
-  browserSync({
-    server: {
-      baseDir: 'public'
-    },
-    open: false
-  })
-})
-
-gulp.task('sass', function() {
-  return gulp.src('source/sass/**/*.scss')
-  .pipe(sass().on('error', sass.logError))
-  .pipe(gulp.dest('public/css'))
-  .pipe(browserSync.reload({
-    stream: true
-  }))
-});
-
-gulp.task('img', function() {
-  return gulp.src('source/img/**/*')
-  .pipe(plumber())
-  .pipe(gulp.dest('public/img'))
-  .pipe(browserSync.stream());
-});
-
-gulp.task('js', function() {
-  return gulp.src(['node_modules/govlab-styleguide/js/**/*', 'source/js/**/*'])
-  .pipe(plumber())
-  .pipe(gulp.dest('public/js'))
-  .pipe(browserSync.stream());
-});
-
-// Nunjucks
-gulp.task('nunjucks', function() {
-
-  var options = {
-    path: 'source/templates',
-    ext: '.html'
-  };
-
-  return gulp.src('source/templates/**/*.+(html|nunjucks)')
-  .pipe(plumber())
-  .pipe(data(function() {
-    return require('./source/data/data.json')
-  }))
-  .pipe(nunjucksRender(options))
-  .pipe(gulp.dest('public'))
-  .pipe(browserSync.reload({
-    stream: true
-  }))
-});
-
-gulp.task('deploy', ['sass', 'nunjucks', 'js', 'img'], shell.task([
-  'git subtree push --prefix public origin gh-pages'
-  ])
-);
-
 
 function slugify(t) {
   return t.toString().toLowerCase()
@@ -162,7 +107,7 @@ function processJSON ( file ) {
   var _jsonOut = [];
   for (var i in _json) {
     _jsonOut[i] = {};
-    _jsonOut[i].id = i;
+    _jsonOut[i].id = md5(i.toString());
 
     for (var j in _json[i]) {
 
@@ -209,6 +154,97 @@ function processJSON ( file ) {
   file.contents = new Buffer(out);
 }
 
+function generateVinyl(data, basePath, templatePath, filePrefix, fileSuffix) {
+  var es = require('event-stream');
+  var templatefile = fs.readFileSync(templatePath);
+  var files = [];
+
+  if (filePrefix === undefined) {
+    filePrefix = '';
+  }
+
+  if (fileSuffix === undefined) {
+    fileSuffix = '.html';
+  }
+
+  for (d in data) {
+    var f = new File({
+      cwd: '.',
+      base: basePath,
+      path: basePath + filePrefix + data[d].id + '--' + slugify(data[d].title) + fileSuffix,
+      contents: templatefile
+    });
+    files.push(f);
+  }
+
+  return require('stream').Readable({ objectMode: true }).wrap(es.readArray(files));
+}
+
+
+gulp.task('browserSync', function() {
+  browserSync({
+    server: {
+      baseDir: 'public'
+    },
+    open: false
+  })
+})
+
+gulp.task('sass', function() {
+  return gulp.src('source/sass/**/*.scss')
+  .pipe(sass().on('error', sass.logError))
+  .pipe(gulp.dest('public/css'))
+  .pipe(browserSync.reload({
+    stream: true
+  }))
+});
+
+gulp.task('img', function() {
+  return gulp.src('source/img/**/*')
+  .pipe(plumber())
+  .pipe(gulp.dest('public/img'))
+  .pipe(browserSync.stream());
+});
+
+gulp.task('js', function() {
+  return gulp.src(['node_modules/govlab-styleguide/js/**/*', 'source/js/**/*'])
+  .pipe(plumber())
+  .pipe(gulp.dest('public/js'))
+  .pipe(browserSync.stream());
+});
+
+// Nunjucks
+gulp.task('nunjucks', ['generateResearchFiles'], function() {
+
+  var options = {
+    path: 'source/templates',
+    ext: '.html'
+  };
+
+  return gulp.src('source/templates/**/*.+(html|nunjucks)')
+  .pipe(plumber())
+  .pipe(data(function(file) {
+    for (var i in researchjson) {
+      if (file.path.indexOf(researchjson[i].id + '--') >= 0) {
+        console.log(i);
+        console.log('Found Generated Template',  file.path, ': using ', JSON.stringify(researchjson[i]).green);
+        return researchjson[i];
+      }
+      return require('./data/data.json');
+    }
+  }))
+  .pipe(nunjucksRender(options))
+  .pipe(gulp.dest('public'))
+  .pipe(browserSync.reload({
+    stream: true
+  }))
+});
+
+gulp.task('deploy', ['sass', 'nunjucks', 'js', 'img'], shell.task([
+  'git subtree push --prefix public origin gh-pages'
+  ])
+);
+
 gulp.task('json', function() {
   var options = {};
   return gulp.src('support/data/**.csv')
@@ -218,6 +254,12 @@ gulp.task('json', function() {
     path.extname = ".json"
   }))
   .pipe(gulp.dest('data'))
+});
+
+
+gulp.task('generateResearchFiles', function() {
+  return generateVinyl(researchjson, './source/templates/repo/', './source/templates/paper-template.html')
+  .pipe(gulp.dest('source/templates/repo'))
 });
 
 
