@@ -1,6 +1,6 @@
 // Flexible Filters with Isotope
 // author: mocxd (//mocxd.github.io)
-// requires JQuery (http://jquery.com/) and Isotope (http://isotope.metafizzy.co/) prior in load order
+// requires JQuery (http://jquery.com/) and Isotope (http://isotope.metafizzy.co/) in prior load order
 $(function() {
     // config options
     // see docs (//somewhere)
@@ -24,7 +24,111 @@ $(function() {
         layoutMode      : 'fitRows',
         sortBy          : 'category'
     };
-    var searchKey   = 'filter';             // location.search key name to be used for url-based filtering
+    var searchKey = 'filter';               // location.search key name to be used for url-based filtering
+
+
+    // returns value of key param from location.search, or false
+    var getSearch = function(param) {
+        var q = location.search.substr(1),
+            result = false;
+
+        q.split('&').forEach(function(part) {
+            var item = part.split('=');
+
+            if (item[0] == param) {
+                result = decodeURIComponent(item[1]);
+
+                if (result.slice(-1) == '/') {
+                    result = result.slice(0, -1);
+                }
+            }
+        });
+        return result;
+    };
+
+    // sets value for key param in location.search asynchronously, while preserving other keys if present
+    var setSearch = function(param, value) {
+        var q = location.search.substr(1),
+            map = [],
+            a = [],
+            contains = false;
+
+        if (q !== '') {
+            q.split('&').forEach(function(part) {
+                var k = (part.split('=')[0]),
+                v = part.split('=')[1],
+                o = {};
+
+                if (part.split('=')[0] == param) {
+                    v = encodeURIComponent(value);
+                    contains = true;
+                }
+
+                o[k] = v;
+                map.push(o);
+            });
+        }
+
+        if (!contains) {
+            var o = {};
+            o[param] = encodeURIComponent(value);
+            map.push(o);
+        }
+
+        map.forEach(function(v, i) {
+            a[i] = Object.keys(v)[0] + '=' + v[Object.keys(v)[0]];
+        });
+        search = a.join('&');
+
+        history.replaceState(
+            { filtering : true },
+            document.title + ' - filtering: ' + value,
+            location.href.substr(0, location.href.indexOf('?') === -1 ? location.href.length : location.href.indexOf('?')) + '?' + search
+            );
+    };
+
+    // filter on value f, or on * if no arguments are provided
+    var filter = function(f = '*', grid = $grid) {
+        // if f doesn't seem like a css selector
+        // (i.e. it has no css selector syntax punctuation, and is a single word),
+        // it will be converted to a simple class selector.  this is mainly to provide an easy way to do
+        // something like data-filter="thing", since we usually don't care about filtering on element types
+        if (!(/[*.~+>#=:()\[\]\s]/g.test(f))) {
+            f = '.' + f;
+        }
+
+        grid.isotope({
+            filter: f
+        });
+    }
+
+    // update filter to value f in location.search, and then filter
+    var updateFilter = function(f, skey = searchKey) {
+        setSearch(skey, f);
+        filter(f);
+    };
+
+    // filters on location.search (pre-filtered grids ignore)
+    // this will also select the corresponding ui filter(s), if available
+    var urlFilter = function(skey = searchKey, grid = $grid, options = jsOptions) {
+        var f = getSearch(skey);
+        if (!f || grid.hasClass(options.preFilter)) {
+            return;
+        }
+        selectFilterUI(f);
+        filter(f);
+    }
+
+    // pre-filters results if preFilter option is enabled in $grid
+    // this will also select the corresponding ui filter(s), if available
+    var preFilter = function(ui = $ui, grid = $grid, options = jsOptions) {
+        var f = grid.attr(options.filterOn);
+        if (!grid.hasClass(options.preFilter)) {
+            return;
+        }
+        selectFilterUI(f);
+        filter(f);
+    }
 
     // binds filters to ui controls
     var bindUI = function(ui = $ui, grid = $grid, options = jsOptions) {
@@ -33,9 +137,9 @@ $(function() {
             var boundEvent = 'click'; // use this event by default
 
             // figure out what event to bind to
-            if ( $this.hasClass(options.click) ) {
+            if ($this.hasClass(options.click)) {
                 boundEvent = 'click';
-            } else if ( $this.hasClass(options.change) ) {
+            } else if ($this.hasClass(options.change)) {
                 boundEvent = 'change';
             }
 
@@ -125,71 +229,6 @@ $(function() {
         }
     };
 
-    // update the url hash to a single value
-    var updateHash = function(val) {
-        // replace current history state and trigger a custom event so we don't create history items on change
-        history.replaceState(undefined, undefined, '#' + val.replace('.', ''));
-        $(window).trigger('hashreplace');
-    };
-
-    var filterOnHash = function() {
-        var filterValue = document.location.hash.replace('#', '');
-        if (filterValue !== '*') {
-            filterValue = '.' + filterValue;
-        }
-        $grid.isotope({
-            filter: filterValue
-        });
-    };
-
-    // uncomment to switch to multiple select
-    //multipleSelectFilter();
-    //selectDefaultFilter();
-
-    // uncomment to switch to single select
-    singleSelectFilter();
-
-    // watch for hash changes
-    $(window).on('hashreplace', function() {
-        filterOnHash();
-    });
-
-    // 1st time page is visited update filter from hash
-    if (document.location.hash) {
-        // set the value of the select control
-        var filterValue = document.location.hash.replace('#', '');
-        if (filterValue !== '*') {
-            filterValue = '.' + filterValue;
-        }
-        setSingleFilter(filterValue);
-        // then filter on it, because setting it via .val() is this way doesn't pop a change event
-        filterOnHash();
-        // or use * if no hash in url
-    } else {
-        $grid.isotope({
-            filter: '*'
-        });
-    }
-
-    var query = function (param) {
-        var query = location.search.substr(1),
-            result = false;
-
-        query.split('&').forEach(function(part) {
-            var item = part.split('=');
-
-            if (item[0] == param) {
-                result = decodeURIComponent(item[1]);
-
-                if (result.slice(-1) == '/') {
-                    result = result.slice(0, -1);
-                }
-            }
-        });
-
-        return result;
-    }
-
     // initialize isotope
     $grid.isotope(isotopeDefaults);
 
@@ -199,9 +238,4 @@ $(function() {
     preFilter();
     urlFilter();
 
-    // pre-filters results if preFilter option is enabled in $grid
-    // this will also select the corresponding ui filter(s), if available
-
-    // filters on location.search (pre-filtered grids ignore)
-    // this will also select the corresponding ui filter(s), if available
 });
