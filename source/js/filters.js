@@ -4,33 +4,48 @@
 $(function() {
     // config options
     // see docs (//somewhere)
-    var $grid = $('.b-isotope');            // jquery selector to bind the isotope grid to
-    var $ui = $('.b-filter-ui');            // jquery selector to bind the ui element(s) to
-    var jsOptions = {                       // names for template-configurable options. e.g. class="js-some-option"
+    var jsBindings = {
+        grid            : '.b-isotope',     // selector to bind the isotope grid to
+        uiBase          : '.b-filter-ui',   // selector to bind the parent element of all containers / ui elements on page
+        uiContainer     : '.b-filter-ui-container', // selector for ui container elements
+        ui              : '.b-filter'       // selector to bind the ui element(s) to
+    },
+
+    jsOptions = {                           // names for template-configurable options. e.g. class="js-some-option"
+        // for ui containers
+        multiSelect     : 'js-multi',       // multiple select option, otherwise defaults to single select
+
         // for ui elements
         click           : 'js-click',       // binds filter behavior to click event
         change          : 'js-change',      // binds filter behavior to change event
-        multiSelect     : 'js-multi',       // multiple select option, otherwise defaults to single select
-        clearFilters    : 'js-clear',       // clears other filters when this filter is selected (multi select only)
+        clearFilters    : 'js-clear',       // clears other filters when this filter is selected (useful for multi select)
+        clearAllFilters : 'js-clear-all',   // clears all filters in uiBase when this filter is selected
         defaultFilter   : 'js-default',     // default filter to select on page load
-        selectedClass   : 'm-active',       // [auto] class to toggle on ui control if selected (not added manually)
+        selectedClass   : 'm-active',       // class to toggle on ui control if selected (added automatically)
+
         // for grid element
         preFilter       : 'js-pre-filter',  // sets results to pre-filter on page load (ignores location.search)
+
         // for either
         filterOn        : 'data-filter'     // attribute name to be used for determining filter string(s)
-    };
-    var isotopeDefaults = {                 // default options for isotope. these can be overwritten with corresponding jsOptions
+    },
+
+    isotopeDefaults = {                     // default options for isotope. these can be overwritten with corresponding jsOptions
         itemSelector    : '.b-result',
         layoutMode      : 'fitRows',
         sortBy          : 'category'
-    };
-    var searchKey = 'filter';               // location.search key name to be used for url-based filtering
+    },
+
+        searchKey   = 'filter',             // location.search key name to be used for url-based filtering
+
+        $grid       = $(jsBindings.grid),
+        $ui         = $(jsBindings.ui);
 
 
     // returns value of key param from location.search, or false
     var getSearch = function(param) {
         var q = location.search.substr(1),
-            result = false;
+        result = false;
 
         q.split('&').forEach(function(part) {
             var item = part.split('=');
@@ -49,9 +64,9 @@ $(function() {
     // sets value for key param in location.search asynchronously, while preserving other keys if present
     var setSearch = function(param, value) {
         var q = location.search.substr(1),
-            map = [],
-            a = [],
-            contains = false;
+        map = [],
+        a = [],
+        contains = false;
 
         if (q !== '') {
             q.split('&').forEach(function(part) {
@@ -100,12 +115,53 @@ $(function() {
         grid.isotope({
             filter: f
         });
-    }
+    };
 
     // update filter to value f in location.search, and then filter
     var updateFilter = function(f, skey = searchKey) {
         setSearch(skey, f);
         filter(f);
+    };
+
+    // select UI component(s) based on filter value
+    var selectFilterUI = function (f, ui = $ui, bindings = jsBindings, options = jsOptions) {
+        ui.each(function (i) {
+            var $this = $(this);
+            if ($this.attr(options.filterOn) == f) {
+                // remove selectedClass from others within the container if multiSelect option is enabled,
+                // and add it to $this. if there is no container for $this, we assume single select
+                var c = $this.closest(bindings.uiContainer),
+                uiBase = $this.closest(bindings.uiBase),
+                toggle = false;
+                if (c.length > 0 && c.hasClass(options.multiSelect)) {
+                    if ($this.hasClass(options.clearFilters)) {
+                        c.children().removeClass(options.selectedClass);
+                    } else if ($this.hasClass(options.clearAllFilters)) {
+                        if (uiBase.length > 0) {
+                            uiBase.find(bindings.uiContainer + ', ' + bindings.ui)
+                            .removeClass(options.selectedClass);
+                        }
+                    } else {
+                        c.children('.' + options.clearFilters).removeClass(options.selectedClass);
+                        toggle = true;
+                    }
+                } else if (c.length === 0) {
+                    ui.not(bindings.uiContainer + ' ' + bindings.ui).removeClass(options.selectedClass);
+                } else { // single select
+                    c.children().removeClass(options.selectedClass);
+                }
+
+                if (!$this.hasClass(options.clearAllFilters)) {
+                    uiBase.find('.' + options.clearAllFilters).removeClass(options.selectedClass);
+                }
+
+                if (toggle) {
+                    $this.toggleClass(options.selectedClass);
+                } else {
+                    $this.addClass(options.selectedClass);
+                }
+            }
+        });
     };
 
     // filters on location.search (pre-filtered grids ignore)
@@ -115,9 +171,10 @@ $(function() {
         if (!f || grid.hasClass(options.preFilter)) {
             return;
         }
-        selectFilterUI(f);
+        console.log('url filtering', f);
         filter(f);
-    }
+        selectFilterUI(f);
+    };
 
     // pre-filters results if preFilter option is enabled in $grid
     // this will also select the corresponding ui filter(s), if available
@@ -126,9 +183,22 @@ $(function() {
         if (!grid.hasClass(options.preFilter)) {
             return;
         }
-        selectFilterUI(f);
+        console.log('pre filtering', f);
         filter(f);
-    }
+        selectFilterUI(f);
+    };
+
+    // run filter based on the default ui control and select that control
+    var defaultFilter = function (ui = $ui, options = jsOptions) {
+        ui.each(function(i) {
+            var $this = $(this);
+            if ($this.hasClass(options.defaultFilter)) {
+                var f = $this.attr(options.filterOn);
+                filter(f);
+                selectFilterUI(f);
+            }
+        });
+    };
 
     // binds filters to ui controls
     var bindUI = function(ui = $ui, grid = $grid, options = jsOptions) {
@@ -151,82 +221,9 @@ $(function() {
 
                 // update the filter (which also updates the current location.search string for permalinking)
                 updateFilter(filterValue);
+                selectFilterUI(filterValue);
             });
         });
-    };
-
-    // single filter term
-    var singleSelectFilter = function() {
-        $('.b-filter-ui select').on('change', function() {
-            var filterValue = this.value;
-            updateHash(filterValue);
-        });
-    };
-
-    var setSingleFilter = function(val) {
-        $('.b-filter-ui select').val(val);
-    };
-
-    // multiple filter terms
-    var multipleSelectFilter = function() {
-        // Functionality for filter UI buttons
-        $('.b-filter-ui').on('click', 'button', function() {
-
-            var filterValue = '';
-
-            // Clicking 'All' filter
-            if ($(this).hasClass('m-clear-filters')) {
-
-                // Deselect all others
-                $('.b-filter-ui').children().each(function() {
-                    $(this).removeClass('m-selected');
-                });
-
-                // Can only select, not deselect 'All'
-                $(this).addClass('m-selected');
-
-                filterValue = '*';
-
-                // Clicking any other filter
-            } else {
-
-                $('.b-filter-ui .m-clear-filters').removeClass('m-selected');
-
-                // Swap selection state of button
-                if (!$(this).hasClass('m-selected')) {
-                    $(this).addClass('m-selected');
-                } else {
-                    $(this).removeClass('m-selected');
-                }
-
-                // Build filter string from all selected filters
-                $('.b-filter-ui').children().each(function() {
-                    if ($(this).hasClass('m-selected')) {
-                        filterValue += $(this).attr('data-filter');
-                    }
-                });
-
-            }
-
-            selectDefaultFilter();
-            updateHash(filterValue);
-        });
-    };
-
-    // Used for multipleSelect() only
-    // If nothing is selected, select 'All' filter
-    var selectDefaultFilter = function() {
-        var noneSelected = true;
-
-        $('.b-filter-ui').children().each(function() {
-            if ($(this).hasClass('m-selected')) {
-                noneSelected = false;
-            }
-        });
-
-        if (noneSelected) {
-            $('.b-filter-ui .m-clear-filters').addClass('m-selected');
-        }
     };
 
     // initialize isotope
@@ -235,7 +232,8 @@ $(function() {
     // bind controls and execute any filtering needed at page load time
     // arguments default to config settings, but can be overridden for more complex page behavior
     bindUI();
-    preFilter();
+    defaultFilter();
     urlFilter();
+    preFilter();
 
 });
