@@ -210,8 +210,8 @@ gulp.task('img', function() {
 gulp.task('js', function() {
   return gulp.src(['node_modules/govlab-styleguide/js/**/*', 'source/js/**/*'])
   .pipe(plumber())
-  .pipe(gulp.dest('public/js'))
-  .pipe(browserSync.stream());
+  .pipe(gulp.dest('public/js'));
+  // .pipe(browserSync.stream());
 });
 
 // Nunjucks
@@ -236,10 +236,8 @@ gulp.task('nunjucks', ['generateResearchFiles'], function() {
     return require('./data/data.json');
   }))
   .pipe(nunjucksRender(options))
-  .pipe(gulp.dest('public'))
-  .pipe(browserSync.reload({
-    stream: true
-  }))
+  .pipe(gulp.dest('public'));
+  // .pipe(browserSync.reload({ stream: true }))
 });
 
 gulp.task('deploy', ['sass', 'nunjucks', 'js', 'img'], shell.task([
