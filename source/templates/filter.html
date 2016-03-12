@@ -8,7 +8,7 @@
     display: inline-block;
     margin: 5px;
 }
-.b-filter.m-active {
+.b-filter:not(.js-change).m-active {
     background-color: #faa;
 }
 .b-filter-ui {
@@ -48,7 +48,7 @@
             <div class="large-4 columns end">
                 <h3>on change</h3>
                 <select class="b-filter js-change">
-                    <option data-filter="*" selected>*</option>
+                    <option data-filter="* *">* *</option>
                     <option data-filter="yo">yo</option>
                     <option data-filter="hey">hey</option>
                     <option data-filter="pancake">pancake</option>

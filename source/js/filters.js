@@ -8,7 +8,7 @@ $(function() {
         grid            : '.b-isotope',     // selector to bind the isotope grid to
         uiBase          : '.b-filter-ui',   // selector to bind the parent element of all containers / ui elements on page
         uiContainer     : '.b-filter-ui-container', // selector for ui container elements
-        ui              : '.b-filter'       // selector to bind the ui element(s) to
+        ui              : '.b-filter, .b-filter option' // selector to bind the ui element(s) to
     },
 
     jsOptions = {                           // names for template-configurable options. e.g. class="js-some-option"
@@ -155,9 +155,6 @@ $(function() {
                     // default to &&
                     compoundFilter += f;
                 }
-
-                console.log(f, compoundFilter);
-
             }
         });
 
@@ -192,7 +189,14 @@ $(function() {
                         toggle = true;
                     }
                 } else if (c.length === 0) {
-                    ui.not(bindings.uiContainer + ' ' + bindings.ui).removeClass(options.selectedClass);
+                    // no container, remove all selectedClass from previously selected non-contained elements
+                    // functionally a single select amongst all ui elements that are not contained
+                    var u = bindings.ui.split(',');
+                    for (var i in u) {
+                        u[i] = bindings.uiContainer + ' ' + u[i].trim();
+                    }
+                    u = u.join(',');
+                    ui.not(u).removeClass(options.selectedClass);
                 } else { // single select
                     c.children().removeClass(options.selectedClass);
                 }
@@ -261,12 +265,16 @@ $(function() {
 
             // set up handler for that event
             $this.on(boundEvent, function() {
-                var filterValue;
+                var f;
 
-                filterValue = $this.attr(options.filterOn);
+                f = $this.attr(options.filterOn);
+
+                if (boundEvent === 'change') {
+                    f = $this.children(':selected').attr(options.filterOn)
+                }
 
                 // update the filter (which also updates the current location.search string for permalinking)
-                selectFilterUI(filterValue);
+                selectFilterUI(f);
                 updateFilter();
             });
         });
