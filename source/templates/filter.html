@@ -15,11 +15,12 @@
     background-color: #fee;
 }
 </style>
+
 <div class="b-page-section">
     <div class="b-filter-ui js-and">
         <div class="row">
             <h2>filter ui</h2>
-            <select>
+            <select id="andor">
                 <option value="and">AND</option>
                 <option value="or">OR</option>
             </select>
@@ -75,4 +76,20 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block pagescripts %}
+<script>
+$(function() {
+    $('#andor').on('change', function() {
+        if ($(this).val() === 'and') {
+            $(this).closest('.b-filter-ui').removeClass('js-or');
+            $(this).closest('.b-filter-ui').addClass('js-and');
+        } else {
+            $(this).closest('.b-filter-ui').removeClass('js-and');
+            $(this).closest('.b-filter-ui').addClass('js-or');
+        }
+    });
+});
+</script>
 {% endblock %}
