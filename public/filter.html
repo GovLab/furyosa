@@ -42,18 +42,19 @@
     display: inline-block;
     margin: 5px;
 }
-.b-filter.m-active {
+.b-filter:not(.js-change).m-active {
     background-color: #faa;
 }
 .b-filter-ui {
     background-color: #fee;
 }
 </style>
+
 <div class="b-page-section">
     <div class="b-filter-ui js-and">
         <div class="row">
             <h2>filter ui</h2>
-            <select>
+            <select id="andor">
                 <option value="and">AND</option>
                 <option value="or">OR</option>
             </select>
@@ -81,7 +82,7 @@
             <div class="large-4 columns end">
                 <h3>on change</h3>
                 <select class="b-filter js-change">
-                    <option data-filter="*" selected>*</option>
+                    <option data-filter="* *">* *</option>
                     <option data-filter="yo">yo</option>
                     <option data-filter="hey">hey</option>
                     <option data-filter="pancake">pancake</option>
@@ -150,6 +151,22 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/jquery.isotope/2.2.2/isotope.pkgd.min.js"></script>
 <script src="js/scripts.js"></script>
 <script src="js/filters.js"></script>
+
+
+<script>
+$(function() {
+    $('#andor').on('change', function() {
+        if ($(this).val() === 'and') {
+            $(this).closest('.b-filter-ui').removeClass('js-or');
+            $(this).closest('.b-filter-ui').addClass('js-and');
+        } else {
+            $(this).closest('.b-filter-ui').removeClass('js-and');
+            $(this).closest('.b-filter-ui').addClass('js-or');
+        }
+    });
+});
+</script>
+
 
 </body>
 </html>

@@ -8,10 +8,14 @@ $(function() {
         grid            : '.b-isotope',     // selector to bind the isotope grid to
         uiBase          : '.b-filter-ui',   // selector to bind the parent element of all containers / ui elements on page
         uiContainer     : '.b-filter-ui-container', // selector for ui container elements
-        ui              : '.b-filter'       // selector to bind the ui element(s) to
+        ui              : '.b-filter, .b-filter option' // selector to bind the ui element(s) to
     },
 
     jsOptions = {                           // names for template-configurable options. e.g. class="js-some-option"
+        // for ui base
+        and             : 'js-and',
+        or              : 'js-or',
+
         // for ui containers
         multiSelect     : 'js-multi',       // multiple select option, otherwise defaults to single select
 
@@ -26,7 +30,7 @@ $(function() {
         // for grid element
         preFilter       : 'js-pre-filter',  // sets results to pre-filter on page load (ignores location.search)
 
-        // for either
+        // etc
         filterOn        : 'data-filter'     // attribute name to be used for determining filter string(s)
     },
 
@@ -37,7 +41,7 @@ $(function() {
     },
 
         searchKey   = 'filter',             // location.search key name to be used for url-based filtering
-
+        $uiBase     = $(jsBindings.uiBase),
         $grid       = $(jsBindings.grid),
         $ui         = $(jsBindings.ui);
 
@@ -104,6 +108,11 @@ $(function() {
 
     // filter on value f, or on * if no arguments are provided
     var filter = function(f = '*', grid = $grid) {
+        // everything is nothing
+        if (f === '') {
+            f = '*';
+        }
+
         // if f doesn't seem like a css selector
         // (i.e. it has no css selector syntax punctuation, and is a single word),
         // it will be converted to a simple class selector.  this is mainly to provide an easy way to do
@@ -117,36 +126,89 @@ $(function() {
         });
     };
 
-    // update filter to value f in location.search, and then filter
-    var updateFilter = function(f, skey = searchKey) {
-        setSearch(skey, f);
-        filter(f);
+    // update filter from UI state
+    // deals with things like filter string building, etc. that are only important from UI
+    // selectFilterUI should always be run first when changing the selected filters, as fitlering is based
+    // on the current state of ui
+    // --possibly move to model-viewmodel pattern--
+    var updateFilter = function(ui = $ui, uiBase = $uiBase, skey = searchKey, options = jsOptions) {
+        var compoundFilter = '';
+
+        ui.each(function (i) {
+            var $this = $(this);
+            if ($this.hasClass(options.selectedClass)) {
+                var f = $this.attr(options.filterOn);
+                // treat unadorned string as class instead of element
+                if (!(/[*.~+>#=:()\[\]\s]/g.test(f))) {
+                    f = '.' + f;
+                }
+
+                // &&
+                if ($uiBase.hasClass(options.and)) {
+                    compoundFilter += f;
+                }
+                // ||
+                else if ($uiBase.hasClass(options.or)) {
+                    compoundFilter += (compoundFilter === '' ? '' : ',') + f;
+                }
+                else {
+                    // default to &&
+                    compoundFilter += f;
+                }
+            }
+        });
+
+        // update filter to value f in location.search, and then filter
+        setSearch(skey, compoundFilter);
+        filter(compoundFilter);
     };
 
     // select UI component(s) based on filter value
-    var selectFilterUI = function (f, ui = $ui, bindings = jsBindings, options = jsOptions) {
-        ui.each(function (i) {
+    // this needs to be done from filter value primarily to support selecting proper UI elements from
+    // the value of location.search url filter
+    var selectFilterUI = function(f, ui = $ui, uiBase = $uiBase, bindings = jsBindings, options = jsOptions) {
+        var parsedf;
+        // parse compound string
+        if ($uiBase.hasClass(options.and)) {
+            parsedf = f.split('.');
+        } else if ($uiBase.hasClass(options.or)) {
+            parsedf = f.split(',');
+            for (var i in parsedf) {
+                parsedf[i].replace(/^\./, '');
+            }
+        } else {
+            parsedf = f.split('.');
+        }
+        ui.each(function(i) {
             var $this = $(this);
-            if ($this.attr(options.filterOn) == f) {
+
+            if (parsedf.indexOf($this.attr(options.filterOn)) >= 0) {
                 // remove selectedClass from others within the container if multiSelect option is enabled,
                 // and add it to $this. if there is no container for $this, we assume single select
                 var c = $this.closest(bindings.uiContainer),
-                uiBase = $this.closest(bindings.uiBase),
-                toggle = false;
+                    uiBase = $this.closest(bindings.uiBase),
+                    toggle = false;
                 if (c.length > 0 && c.hasClass(options.multiSelect)) {
                     if ($this.hasClass(options.clearFilters)) {
                         c.children().removeClass(options.selectedClass);
                     } else if ($this.hasClass(options.clearAllFilters)) {
                         if (uiBase.length > 0) {
                             uiBase.find(bindings.uiContainer + ', ' + bindings.ui)
-                            .removeClass(options.selectedClass);
+                                .removeClass(options.selectedClass);
                         }
                     } else {
                         c.children('.' + options.clearFilters).removeClass(options.selectedClass);
                         toggle = true;
                     }
                 } else if (c.length === 0) {
-                    ui.not(bindings.uiContainer + ' ' + bindings.ui).removeClass(options.selectedClass);
+                    // no container, remove all selectedClass from previously selected non-contained elements
+                    // functionally a single select amongst all ui elements that are not contained
+                    var u = bindings.ui.split(',');
+                    for (var i in u) {
+                        u[i] = bindings.uiContainer + ' ' + u[i].trim();
+                    }
+                    u = u.join(',');
+                    ui.not(u).removeClass(options.selectedClass);
                 } else { // single select
                     c.children().removeClass(options.selectedClass);
                 }
@@ -215,13 +277,17 @@ $(function() {
 
             // set up handler for that event
             $this.on(boundEvent, function() {
-                var filterValue;
+                var f;
 
-                filterValue = $this.attr(options.filterOn);
+                f = $this.attr(options.filterOn);
+
+                if (boundEvent === 'change') {
+                    f = $this.children(':selected').attr(options.filterOn)
+                }
 
                 // update the filter (which also updates the current location.search string for permalinking)
-                updateFilter(filterValue);
-                selectFilterUI(filterValue);
+                selectFilterUI(f);
+                updateFilter();
             });
         });
     };
