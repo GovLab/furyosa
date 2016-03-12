@@ -149,7 +149,7 @@ $(function() {
                 }
                 // ||
                 else if ($uiBase.hasClass(options.or)) {
-                    compoundFilter += (compoundFilter === '' ? '' : ', ') + f;
+                    compoundFilter += (compoundFilter === '' ? '' : ',') + f;
                 }
                 else {
                     // default to &&
@@ -166,23 +166,35 @@ $(function() {
     // select UI component(s) based on filter value
     // this needs to be done from filter value primarily to support selecting proper UI elements from
     // the value of location.search url filter
-    var selectFilterUI = function (f, ui = $ui, bindings = jsBindings, options = jsOptions) {
-        ui.each(function (i) {
+    var selectFilterUI = function(f, ui = $ui, uiBase = $uiBase, bindings = jsBindings, options = jsOptions) {
+        var parsedf;
+        // parse compound string
+        if ($uiBase.hasClass(options.and)) {
+            parsedf = f.split('.');
+        } else if ($uiBase.hasClass(options.or)) {
+            parsedf = f.split(',');
+            for (var i in parsedf) {
+                parsedf[i].replace(/^\./, '');
+            }
+        } else {
+            parsedf = f.split('.');
+        }
+        ui.each(function(i) {
             var $this = $(this);
-            // need to add something here to allow handling of compound filter string
-            if ($this.attr(options.filterOn) == f) {
+
+            if (parsedf.indexOf($this.attr(options.filterOn)) >= 0) {
                 // remove selectedClass from others within the container if multiSelect option is enabled,
                 // and add it to $this. if there is no container for $this, we assume single select
                 var c = $this.closest(bindings.uiContainer),
-                uiBase = $this.closest(bindings.uiBase),
-                toggle = false;
+                    uiBase = $this.closest(bindings.uiBase),
+                    toggle = false;
                 if (c.length > 0 && c.hasClass(options.multiSelect)) {
                     if ($this.hasClass(options.clearFilters)) {
                         c.children().removeClass(options.selectedClass);
                     } else if ($this.hasClass(options.clearAllFilters)) {
                         if (uiBase.length > 0) {
                             uiBase.find(bindings.uiContainer + ', ' + bindings.ui)
-                            .removeClass(options.selectedClass);
+                                .removeClass(options.selectedClass);
                         }
                     } else {
                         c.children('.' + options.clearFilters).removeClass(options.selectedClass);
