@@ -6942,24 +6942,24 @@ code.m-negative {
 .b-main-categories {
   padding: 0; }
   .b-main-categories .e-category-item {
-    padding: 45px 0;
+    padding: 45% 0;
     text-align: center;
     font-size: 22px;
     text-transform: uppercase; }
   .b-main-categories .m-behavioral-research {
-    background-color: blue; }
+    background-color: #96c8ff; }
   .b-main-categories .m-citizen-engagement {
-    background-color: cyan; }
+    background-color: #ffc8ff; }
   .b-main-categories .m-civic-technology {
-    background-color: red; }
+    background-color: #ffff64; }
   .b-main-categories .m-data-analysis {
-    background-color: orange; }
+    background-color: #ff6400; }
   .b-main-categories .m-expert-networking {
-    background-color: #008ab3; }
+    background-color: #ff009b; }
   .b-main-categories .m-open-data {
-    background-color: pink; }
+    background-color: #00c300; }
   .b-main-categories .m-labs-and-experimentation {
-    background-color: green; }
+    background-color: #379bc8; }
 
 .b-organizations .e-organization-logo {
   padding: 60px 20px;
@@ -6970,33 +6970,45 @@ code.m-negative {
   padding: 0; }
 
 .b-result-item {
-  width: calc(100% / 3);
   font-weight: 300;
   display: inline-block;
-  padding: 30px;
-  margin: 0 -2px;
-  height: 0;
   position: relative;
   vertical-align: top;
-  padding-bottom: 16%;
-  background-color: #efefef;
-  transition: all .4s ease;
-  box-shadow: 0 0 0 rgba(51, 51, 51, 0); }
-  .b-result-item:nth-of-type(2n) {
-    background-color: #eaeaea; }
-  .b-result-item:hover {
-    transition: all .4s ease;
-    box-shadow: 0 0 20px rgba(51, 51, 51, 0.2);
-    position: relative;
-    z-index: 10; }
-    .b-result-item:hover > * {
-      text-decoration: none; }
-  .b-result-item:nth-of-type(3n + 1):hover {
-    transform: scale(1.3) translate(10%); }
-  .b-result-item:nth-of-type(3n + 2):hover {
-    transform: scale(1.3); }
-  .b-result-item:nth-of-type(3n):hover {
-    transform: scale(1.3) translate(-10%); }
+  background-color: white;
+  box-shadow: 0 0 0 rgba(51, 51, 51, 0);
+  width: 100%; }
+  .b-result-item a {
+    padding: 30px;
+    width: 100%;
+    display: block;
+    text-decoration: none; }
+  @media screen and (min-width: 40.063em) {
+    .b-result-item {
+      width: 50%;
+      margin: 0 -2px; }
+      .b-result-item:nth-of-type(2n + 1) a {
+        background-color: rgba(51, 51, 51, 0.1); }
+      .b-result-item a {
+        height: 0;
+        padding-bottom: 70%; } }
+  @media screen and (min-width: 64.063em) {
+    .b-result-item {
+      transition: all .4s ease;
+      width: calc(100% / 3);
+      margin: 0 -2px; }
+      .b-result-item:nth-of-type(odd) a {
+        background-color: rgba(51, 51, 51, 0.05); }
+      .b-result-item:hover {
+        transition: all .4s ease;
+        box-shadow: 0 0 20px rgba(51, 51, 51, 0.2);
+        position: relative;
+        z-index: 10; }
+        .b-result-item:hover:nth-of-type(3n + 1):hover {
+          transform: scale(1.3) translate(11%); }
+        .b-result-item:hover:nth-of-type(3n + 2):hover {
+          transform: scale(1.3); }
+        .b-result-item:hover:nth-of-type(3n):hover {
+          transform: scale(1.3) translate(-11%); } }
   .b-result-item:after {
     content: "";
     width: 0;
@@ -7011,6 +7023,9 @@ code.m-negative {
   .b-result-item .e-result-name {
     font-size: 1rem;
     text-transform: none; }
+  .b-result-item .e-result-taxonomy p {
+    font-size: .8rem;
+    margin: 10px 0 0; }
   .b-result-item .e-result-taxonomy span {
     font-size: .6rem;
     text-transform: uppercase;
@@ -7021,8 +7036,12 @@ code.m-negative {
   .b-result-item .e-result-authors {
     font-size: .9rem; }
   .b-result-item .e-result-extras {
-    padding: 10px 0;
-    text-align: right; }
+    padding: 15px 30px;
+    text-align: right;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    right: 0; }
     .b-result-item .e-result-extras img {
       width: 24px;
       opacity: .2;
@@ -7033,6 +7052,16 @@ code.m-negative {
       line-height: 1;
       vertical-align: bottom;
       margin: 0 5px -2px; }
+
+.b-result-item.m-access-false .e-result-extras {
+  background-color: #c30014;
+  padding-top: 15px; }
+  .b-result-item.m-access-false .e-result-extras:before {
+    content: "restricted access";
+    float: left;
+    text-transform: uppercase;
+    font-weight: bold;
+    color: white; }
 
 .b-filter-panel {
   text-align: center; }
