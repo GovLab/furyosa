@@ -30,23 +30,38 @@
       </form>
     </div> -->
       {% for d in data %}
-      <div class="b-result-item m-access-{{d.access}}">
-        <a href="{{d.url}}">
-          
-          {% if d.cover_image %}
+      <div class="b-result-item m-access-{{d.access}} m-type-{{d.type}}">
+        <a href="{{d.url}}" title="{{d.title}}">
+          {# {% if d.cover_image %}
             <div class="e-result-image" style="background-image: url('{{d.cover_image}}')"></div>
-          {% endif %}
+          {% endif %} #}
 
           <h3 class="e-result-name">{{d.title}}</h3>
           
-          <p class="e-result-authors">{% for a in d.authors %} {{a}}, {% endfor %}</p>
-          
+          {% if d.authors %}
+            <p class="e-result-authors">{% for a in d.authors %} {{a}}, {% endfor %}</p>
+          {% endif %}
+
+          {% if d.taxonomy.category %}
           <div class="e-result-taxonomy m-category">
+            <p>Category</p>
             {% for cat in d.taxonomy.category %} <span>{{cat}}</span> {% endfor %}
           </div>
+          {% endif %}
 
-          <div class="e-result-taxonomy m-methodology">{% for met in d.taxonomy.methodology %} <span>{{met}}</span> {% endfor %}</div>
-          <div class="e-result-taxonomy m-objective">{% for obj in d.taxonomy.objective %} <span>{{obj}}</span> {% endfor %}</div>
+          {% if d.taxonomy.methodology %}
+          <div class="e-result-taxonomy m-methodology">
+            <p>Methodology</p>
+            {% for met in d.taxonomy.methodology %} <span>{{met}}</span> {% endfor %}
+          </div>
+          {% endif %}
+
+          {% if d.taxonomy.objective %}
+          <div class="e-result-taxonomy m-objective">
+            <p>Objective</p>
+            {% for obj in d.taxonomy.objective %} <span>{{obj}}</span> {% endfor %}</div>
+          {% endif %}
+
           <div class="e-result-extras">
             {% if d.github %} <img src="img/github-logo.svg" alt=""> {% endif %}
             {% if d.datasets %} <i class="material-icons" title="Datasets">file_download</i>{% endif %}
