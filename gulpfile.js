@@ -49,7 +49,6 @@ gulp.task('nunjucks', function() {
     ext: '.html'
   };
   // nunjucksRender.nunjucks.configure(['source/templates/']);
-
   return gulp.src('source/templates/**/*.+(html|nunjucks)')
   .pipe(plumber())
   // Adding data to Nunjucks
