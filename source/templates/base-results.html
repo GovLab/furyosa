@@ -7,7 +7,15 @@
         <div class="large-12 column">
           <h1>Open Data</h1>
           <h3 class="e-tagline">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sed, praesentium, ipsa nam quam.</h3>
-        </div>  
+        </div>
+        <div class="switch">
+            <label>
+              All Articles
+              <input type="checkbox">
+              <span class="lever"></span>
+              Free Articles Only
+            </label>
+        </div>
       </div>
   </div>
   <div class="b-divider b-filter-panel m-black">
@@ -30,7 +38,7 @@
       </form>
     </div> -->
       {% for d in data %}
-      <div class="b-result-item m-access-{{d.access}} m-type-{{d.type}}">
+      <div class="b-result-item m-access-{{d.access}} m-{{d.taxonomy.category}}">
         <a href="{{d.url}}" title="{{d.title}}">
           {# {% if d.cover_image %}
             <div class="e-result-image" style="background-image: url('{{d.cover_image}}')"></div>

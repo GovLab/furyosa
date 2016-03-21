@@ -9,6 +9,8 @@ file            = require('gulp-file'),
 plumber         = require('gulp-plumber'),
 packagejson     = require('./package.json');
 
+
+
 gulp.task('browserSync', function() {
   browserSync({
     server: {
@@ -41,13 +43,15 @@ gulp.task('js', function() {
   .pipe(browserSync.stream());
 });
 
+
 // Nunjucks
 gulp.task('nunjucks', function() {
 
   var options = {
     path: 'source/templates',
-    ext: '.html'
+    ext: '.html'  
   };
+
   // nunjucksRender.nunjucks.configure(['source/templates/']);
   return gulp.src('source/templates/**/*.+(html|nunjucks)')
   .pipe(plumber())
@@ -61,6 +65,8 @@ gulp.task('nunjucks', function() {
     stream: true
   }))
 });
+
+
 
 gulp.task('deploy', ['sass', 'nunjucks', 'js', 'img'], shell.task([
   'git subtree push --prefix public origin gh-pages'
