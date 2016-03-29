@@ -1,8 +1,13 @@
 # Required Fields
 # ===============
 
+<<<<<<< HEAD
+id: INT
+# Base Item ID
+=======
 id: INT 
 # Base Item ID. Auto-generated
+>>>>>>> f038aeff05847ec06c42dc7965de9af85e14fce6
 
 pub_date: DATETIME
 # Date the item was added to the system defaults to Datetime.now() Auto-generated
@@ -43,8 +48,13 @@ sector: STRING (keywords | slugyfied)
 type: STRING (keywords | slugyfied)
 # Type of publication. Reseach Paper, Article, etc.
 
+<<<<<<< HEAD
+abstract: LONG STRING (800 chars)
+# usually the abstract from the paper itself. Maybe support markdown
+=======
 abstract: LONG STRING (1200 chars) 
 # usually the abstract from teh paper itself. Maybe support markdown
+>>>>>>> f038aeff05847ec06c42dc7965de9af85e14fce6
 
 taxonomy: # list of keywords to categorize the paper in the research taxonomy
   category: LIST of STRINGS (keywords/taxonomy)
